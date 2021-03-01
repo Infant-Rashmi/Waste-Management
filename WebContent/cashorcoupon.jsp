@@ -1,0 +1,65 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+    
+ <%@page import="java.sql.*" %>
+ <%@page import="java.sql.ResultSet"%>
+<%@page import="java.sql.Statement"%>
+<%@page import="java.sql.Connection"%>
+
+<%
+String driver = "com.mysql.jdbc.Driver";
+String connectionUrl = "jdbc:mysql://localhost:3306/";
+String database = "mydb";
+String userid = "Infant Rashmi";
+String password = "Rashmi#18";
+try {
+Class.forName(driver);
+} catch (ClassNotFoundException e) {
+e.printStackTrace();
+}
+Connection connection = null,co=null;
+Statement statement = null;
+ResultSet res = null,resultSet=null;
+%>
+<% try{
+	String phno=request.getParameter("phno");
+	String area=request.getParameter("area");
+    String address=request.getParameter("address");
+    String payment=request.getParameter("payment");
+    	 co=DriverManager.getConnection(connectionUrl+database, userid, password);
+      
+      PreparedStatement pst1=co.prepareStatement("select * from purchaseorder ");
+      //pst1.setString(1, phno);
+     resultSet = pst1.executeQuery();
+     if(resultSet.last()){
+     
+   int id=resultSet.getInt("id");
+   out.println(id);
+     PreparedStatement pst2=co.prepareStatement("Update purchaseorder set paymentmode=?,paid_or_not=?,collected_or_not=?,area=?,address=? where id=? ");
+     pst2.setString(1,payment);
+     if(payment.equals("coupon"))
+     {
+    	 pst2.setString(2,"yes");
+     }
+     else
+     {
+     pst2.setString(2,"no");
+     }
+     pst2.setString(3,"no");
+     pst2.setString(4,area);
+     pst2.setString(5,address);
+     pst2.setInt(6,id);
+     pst2.executeUpdate();
+     PreparedStatement pst3=co.prepareStatement("Update customers set purchaseno=? where phno=? ");
+     pst3.setInt(1,id);
+     pst3.setString(2,phno);
+  
+     pst3.executeUpdate();
+    // out.println("Success");
+   response.sendRedirect("thankyou.jsp");
+     }
+     co.close();
+     } catch (Exception e) {
+     e.printStackTrace();
+     }
+%>
